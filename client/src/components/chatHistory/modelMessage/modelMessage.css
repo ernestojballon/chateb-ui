@@ -1,0 +1,55 @@
+/* List styling */
+.markdown-ul,
+.markdown-ol {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.markdown-ul {
+  list-style-type: disc;
+}
+
+.markdown-ol {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.markdown-ul .markdown-ul {
+  list-style-type: circle;
+  margin: 0.5rem 0;
+}
+
+.markdown-ol .markdown-ol {
+  list-style-type: lower-alpha;
+  margin: 0.5rem 0;
+}
+
+.markdown-ul .markdown-ul .markdown-ul {
+  list-style-type: square;
+}
+
+.markdown-ol .markdown-ol .markdown-ol {
+  list-style-type: lower-roman;
+}
+
+/* List items */
+.markdown-li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.markdown-li:last-child {
+  margin-bottom: 0;
+}
+
+/* For task lists with checkboxes */
+.markdown-li input[type="checkbox"] {
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* For lists inside other elements */
+.markdown-blockquote .markdown-ul,
+.markdown-blockquote .markdown-ol {
+  margin: 0.5rem 0;
+}

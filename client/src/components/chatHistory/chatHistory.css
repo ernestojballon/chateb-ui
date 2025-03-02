@@ -26,28 +26,7 @@
           background-color: #f0f5ff;
           color: #1a202c;
           align-self: flex-start;
-          border-radius: 10px 10px 10px 0; 
-            ul,ol {
-            padding-left: 1rem;
-          }
-
-          p, li {
-            margin: .8rem 0;
-          }
-          pre {
-            background-color: rgba(0, 0, 0, 0.05);
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 12px 0;
-          }
-
-          code {
-            background-color: rgba(0, 0, 0, 0.05);
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 0.9em;
-          }
+          border-radius: 10px 10px 10px 0;  
         }
         
         &.user {
@@ -55,22 +34,6 @@
           color: white;
           align-self: flex-end;
           border-radius: 10px 10px 0 10px; 
-          margin-left: auto;
-          
-          pre {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 12px 0;
-          }
-
-          code {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-size: 0.9em;
-          }
         }
       }
       
