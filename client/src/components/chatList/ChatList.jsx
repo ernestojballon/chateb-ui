@@ -23,21 +23,14 @@ const ChatList = () => {
         {isPending
           ? "Loading..."
           : error
-          ? "Something went wrong!"
-          : data?.map((chat) => (
-              <Link to={`/dashboard/chats/${chat._id}`} key={chat._id}>
-                {chat.title}
-              </Link>
-            ))}
+            ? "Something went wrong!"
+            : data?.map((chat) => (
+                <Link to={`/dashboard/chats/${chat._id}`} key={chat._id}>
+                  {chat.title}
+                </Link>
+              ))}
       </div>
       <hr />
-      <div className="upgrade">
-        <img src="/logo.png" alt="" />
-        <div className="texts">
-          <span>Upgrade to Lama AI Pro</span>
-          <span>Get unlimited access to all features</span>
-        </div>
-      </div>
     </div>
   );
 };

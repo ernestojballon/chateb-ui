@@ -1,4 +1,4 @@
-import { IKContext, IKImage, IKUpload } from "imagekitio-react";
+import { IKContext, IKUpload } from "imagekitio-react";
 import { useRef } from "react";
 
 const urlEndpoint = import.meta.env.VITE_IMAGE_KIT_ENDPOINT;
@@ -11,7 +11,7 @@ const authenticator = async () => {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
-        `Request failed with status ${response.status}: ${errorText}`
+        `Request failed with status ${response.status}: ${errorText}`,
       );
     }
 
@@ -23,8 +23,12 @@ const authenticator = async () => {
   }
 };
 
-const Upload = ({ setImg }) => {
+const Upload = ({ setImg, uploadRef }) => {
   const ikUploadRef = useRef(null);
+
+  // Use the external ref if provided, otherwise use the local ref
+  const finalRef = uploadRef || ikUploadRef;
+
   const onError = (err) => {
     console.log("Error", err);
   };
@@ -71,10 +75,10 @@ const Upload = ({ setImg }) => {
         onUploadProgress={onUploadProgress}
         onUploadStart={onUploadStart}
         style={{ display: "none" }}
-        ref={ikUploadRef}
+        ref={finalRef}
       />
       {
-        <label onClick={() => ikUploadRef.current.click()}>
+        <label onClick={() => finalRef.current.click()}>
           <img src="/attachment.png" alt="" />
         </label>
       }

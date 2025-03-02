@@ -2,62 +2,45 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden; /* Prevent scrollbar from showing unnecessarily */
 
   hr {
     border: none;
-    height: 2px;
-    background-color: #ddd;
-    opacity: 0.1;
-    border-radius: 5px;
-    margin: 20px 0px;
+    height: 1px; /* Slightly thinner hr */
+    background-color: #333; /* Darker grey for better contrast */
+    opacity: 0.5; /* Slightly more visible */
+    margin: 15px 0; /* Adjusted margin */
   }
 
   .title {
     font-weight: 600;
-    font-size: 10px;
+    font-size: 12px; /* Slightly larger font size for better readability */
+    text-transform: uppercase; /* For a consistent look */
+    color: #888; /* Lighter grey for better contrast */
     margin-bottom: 10px;
+    padding: 5px 10px; /* Add some padding for better look */
+    border-radius: 5px; /* Match hr border radius */
   }
 
   .list {
     display: flex;
     flex-direction: column;
-    overflow: scroll;
+    flex: 1; /* Allow list to take up available space */
+    overflow-y: auto; /* Only scroll vertically */
+    padding: 0 10px; /* Add padding to the list */
   }
 
   a {
-    padding: 10px;
+    padding: 10px 15px; /* Added horizontal padding */
     border-radius: 10px;
+    text-decoration: none; /* Remove default underline */
+    color: white; /* Set text color to white */
+    background-color: #444; /* Dark grey background for better contrast */
+    margin-bottom: 5px; /* Add space between links */
+    transition: background-color 0.2s ease; /* Smooth transition for hover */
 
     &:hover {
-      background-color: #2c2937;
-    }
-  }
-
-  .upgrade {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-
-    img {
-      width: 24px;
-      height: 24px;
-    }
-
-    .texts {
-      display: flex;
-      flex-direction: column;
-
-      span {
-        &:first-child {
-          font-weight: 600;
-        }
-
-        &:last-child {
-          color: #888;
-        }
-      }
+      background-color: #2c2937; /* Darker hover color */
     }
   }
 }

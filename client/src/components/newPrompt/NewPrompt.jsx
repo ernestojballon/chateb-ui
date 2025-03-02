@@ -3,10 +3,18 @@ import "./newPrompt.css";
 import Upload from "../upload/Upload";
 import { IKImage } from "imagekitio-react";
 import model from "../../lib/gemini";
-import Markdown from "react-markdown";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUpdateChat } from "../../apiCalls/useUpdateChat";
+import useStore from "../../store";
+import { MdCancel } from "react-icons/md";
 
-const NewPrompt = ({ data }) => {
+const NewPrompt = () => {
+  const {
+    chatId,
+    chatHistory,
+    preAddUserMsgToChatHistory,
+    preAddModelMsgToChatHistory,
+  } = useStore();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [img, setImg] = useState({
@@ -17,77 +25,64 @@ const NewPrompt = ({ data }) => {
   });
 
   const chat = model.startChat({
-    history: [
-      data?.history.map(({ role, parts }) => ({
-        role,
-        parts: [{ text: parts[0].text }],
-      })),
-    ],
+    history: chatHistory?.map(({ role, parts }) => ({
+      role: role,
+      parts: [{ text: parts[0].text }],
+    })),
+
     generationConfig: {
       // maxOutputTokens: 100,
     },
   });
 
-  const endRef = useRef(null);
   const formRef = useRef(null);
 
-  useEffect(() => {
-    endRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [data, question, answer, img.dbData]);
-
   const queryClient = useQueryClient();
+  const resetForm = () => {
+    formRef.current.reset();
+    setQuestion("");
+    setAnswer("");
+    setImg({
+      isLoading: false,
+      error: "",
+      dbData: {},
+      aiData: {},
+    });
+  };
 
-  const mutation = useMutation({
-    mutationFn: () => {
-      return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${data._id}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: question.length ? question : undefined,
-          answer,
-          img: img.dbData?.filePath || undefined,
-        }),
-      }).then((res) => res.json());
-    },
+  const newMutation = useUpdateChat(chatId, {
     onSuccess: () => {
-      queryClient
-        .invalidateQueries({ queryKey: ["chat", data._id] })
-        .then(() => {
-          formRef.current.reset();
-          setQuestion("");
-          setAnswer("");
-          setImg({
-            isLoading: false,
-            error: "",
-            dbData: {},
-            aiData: {},
-          });
-        });
-    },
-    onError: (err) => {
-      console.log(err);
+      queryClient.invalidateQueries({ queryKey: ["chat", chatId] }).then(() => {
+        resetForm();
+      });
     },
   });
 
   const add = async (text, isInitial) => {
     if (!isInitial) setQuestion(text);
-
+    preAddUserMsgToChatHistory({
+      text: text,
+      img: img.dbData?.filePath,
+    });
     try {
       const result = await chat.sendMessageStream(
-        Object.entries(img.aiData).length ? [img.aiData, text] : [text]
+        Object.entries(img.aiData).length ? [img.aiData, text] : [text],
       );
       let accumulatedText = "";
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
-        console.log(chunkText);
         accumulatedText += chunkText;
         setAnswer(accumulatedText);
+        preAddModelMsgToChatHistory({
+          text: accumulatedText,
+        });
       }
 
-      mutation.mutate();
+      newMutation.mutate({
+        question: text,
+        answer: accumulatedText,
+        img: img.dbData?.filePath,
+      });
     } catch (err) {
       console.log(err);
     }
@@ -104,44 +99,59 @@ const NewPrompt = ({ data }) => {
 
   // IN PRODUCTION WE DON'T NEED IT
   const hasRun = useRef(false);
-
+  const uploadRef = useRef(null);
   useEffect(() => {
     if (!hasRun.current) {
-      if (data?.history?.length === 1) {
-        add(data.history[0].parts[0].text, true);
+      if (chatHistory.length === 1) {
+        add(chatHistory[0].parts[0].text, true);
       }
     }
     hasRun.current = true;
   }, []);
 
+  const handleRemoveImage = (e) => {
+    e.preventDefault();
+    setImg({
+      isLoading: false,
+      error: "",
+      dbData: {},
+      aiData: {},
+    });
+    // Reset the upload component if needed
+    if (uploadRef.current) {
+      // This will clear the file input
+      uploadRef.current.value = "";
+    }
+  };
   return (
-    <>
+    <div className="newPrompt">
       {/* ADD NEW CHAT */}
-      {img.isLoading && <div className="">Loading...</div>}
-      {img.dbData?.filePath && (
-        <IKImage
-          urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
-          path={img.dbData?.filePath}
-          width="380"
-          transformation={[{ width: 380 }]}
-        />
-      )}
-      {question && <div className="message user">{question}</div>}
-      {answer && (
-        <div className="message">
-          <Markdown>{answer}</Markdown>
-        </div>
-      )}
-      <div className="endChat" ref={endRef}></div>
+      <div className="tempImg">
+        {img.isLoading && <div className="">Loading...</div>}
+
+        {img.dbData?.filePath && (
+          <div className="thumbnailImg">
+            <span onClick={handleRemoveImage} className="cancelButton">
+              <MdCancel color="#2c2937" size={24} />
+            </span>
+            <IKImage
+              urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
+              path={img.dbData?.filePath}
+              width="100"
+              transformation={[{ width: 100, height: 100 }]}
+            />
+          </div>
+        )}
+      </div>
       <form className="newForm" onSubmit={handleSubmit} ref={formRef}>
-        <Upload setImg={setImg} />
+        <Upload setImg={setImg} uploadRef={uploadRef} />
         <input id="file" type="file" multiple={false} hidden />
         <input type="text" name="text" placeholder="Ask anything..." />
         <button>
           <img src="/arrow.png" alt="" />
         </button>
       </form>
-    </>
+    </div>
   );
 };
 
