@@ -14,6 +14,8 @@
     flex-direction: column;
     position: relative;
     padding-bottom: 80px; /* Space for the input form */
+    padding-top: 50px;
+    align-items: center;
 
     
   }

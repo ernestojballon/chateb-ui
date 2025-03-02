@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
 import { useChatData } from "../../apiCalls/useChatData";
 import useStore from "../../store";
 import { IKImage } from "imagekitio-react";
-import Markdown from "react-markdown";
+
 import "./chatHistory.css";
+import ModelMessage from "./modelMessage/modelMessage";
 
 const ChatHistory = () => {
   const { chatId, setChatInfo, chatHistory } = useStore();
@@ -27,28 +28,24 @@ const ChatHistory = () => {
         : error
           ? "Something went wrong!"
           : chatHistory?.map((message, i) => (
-              <>
+              <div
+                className={message.role === "user" ? "message user" : "message"}
+                key={i}
+              >
                 {message.img && (
                   <IKImage
                     className={"message user userImage"}
                     urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
                     path={message.img}
-                    height="300"
-                    width="400"
-                    transformation={[{ height: 300, width: 500 }]}
+                    height="200"
+                    width="200"
+                    transformation={[{ height: 200, width: 200 }]}
                     loading="lazy"
                     lqip={{ active: true, quality: 20 }}
                   />
                 )}
-                <div
-                  className={
-                    message.role === "user" ? "message user" : "message"
-                  }
-                  key={i}
-                >
-                  <Markdown>{message.parts[0].text}</Markdown>
-                </div>
-              </>
+                <ModelMessage msg={message.parts[0].text} />
+              </div>
             ))}
       <div className="endChat" ref={endRef}></div>
     </div>
