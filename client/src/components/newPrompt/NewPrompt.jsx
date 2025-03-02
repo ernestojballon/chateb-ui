@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useUpdateChat } from "../../apiCalls/useUpdateChat";
 import useStore from "../../store";
 import { MdCancel } from "react-icons/md";
+import MultilineInput from "./multilineInput/multilineInput";
 
 const NewPrompt = () => {
   const {
@@ -15,15 +16,13 @@ const NewPrompt = () => {
     preAddUserMsgToChatHistory,
     preAddModelMsgToChatHistory,
   } = useStore();
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
     dbData: {},
     aiData: {},
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const chat = model.startChat({
     history: chatHistory?.map(({ role, parts }) => ({
       role: role,
@@ -40,8 +39,6 @@ const NewPrompt = () => {
   const queryClient = useQueryClient();
   const resetForm = () => {
     formRef.current.reset();
-    setQuestion("");
-    setAnswer("");
     setImg({
       isLoading: false,
       error: "",
@@ -58,8 +55,7 @@ const NewPrompt = () => {
     },
   });
 
-  const add = async (text, isInitial) => {
-    if (!isInitial) setQuestion(text);
+  const add = async (text) => {
     preAddUserMsgToChatHistory({
       text: text,
       img: img.dbData?.filePath,
@@ -72,7 +68,6 @@ const NewPrompt = () => {
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
         accumulatedText += chunkText;
-        setAnswer(accumulatedText);
         preAddModelMsgToChatHistory({
           text: accumulatedText,
         });
@@ -88,13 +83,11 @@ const NewPrompt = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const text = e.target.text.value;
+  const handleSubmit = async (text) => {
     if (!text) return;
-
-    add(text, false);
+    setIsLoading(true);
+    await add(text);
+    setIsLoading(false);
   };
 
   // IN PRODUCTION WE DON'T NEED IT
@@ -123,6 +116,21 @@ const NewPrompt = () => {
       uploadRef.current.value = "";
     }
   };
+
+  const handleKeyDown = (e) => {
+    // Allow Shift+Enter for new line
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+
+    // Auto resize the textarea
+    const textarea = e.target;
+    setTimeout(() => {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }, 0);
+  };
   return (
     <div className="newPrompt">
       {/* ADD NEW CHAT */}
@@ -146,7 +154,8 @@ const NewPrompt = () => {
       <form className="newForm" onSubmit={handleSubmit} ref={formRef}>
         <Upload setImg={setImg} uploadRef={uploadRef} />
         <input id="file" type="file" multiple={false} hidden />
-        <input type="text" name="text" placeholder="Ask anything..." />
+        <MultilineInput onSubmit={handleSubmit} disabled={isLoading} />
+        {/* <input type="text" name="text" placeholder="Ask anything..." /> */}
         <button>
           <img src="/arrow.png" alt="" />
         </button>
