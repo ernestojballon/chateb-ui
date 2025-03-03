@@ -16,10 +16,6 @@ const RootLayout = () => {
       <QueryClientProvider client={queryClient}>
         <div className="rootLayout">
           <header>
-            <Link to="/" className="logo">
-              <img src="/logo.png" alt="" />
-              <span>LAMA AI</span>
-            </Link>
             <div className="user">
               <SignedIn>
                 <UserButton />

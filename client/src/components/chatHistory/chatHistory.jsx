@@ -1,28 +1,38 @@
 import { useEffect, useRef } from "react";
-import { useChatData } from "../../apiCalls/useChatData";
+import { useGetChatDataById } from "../../apiCalls/useGetChatDataById";
 import useStore from "../../store";
 import { IKImage } from "imagekitio-react";
-
 import "./chatHistory.css";
 import ModelMessage from "./modelMessage/modelMessage";
+import useGetChatId from "../../helpers/useGetChatId";
+import EndChat from "./endChat.js/endChat";
 
 const ChatHistory = () => {
-  const { chatId, setChatInfo, chatHistory } = useStore();
-  const { isPending, error, data } = useChatData(chatId);
+  const [chatId] = useGetChatId();
+  const { setChatInfo, chatHistory, scrolltoEnd, setScrollToEnd } = useStore();
+  const { isPending, error, data } = useGetChatDataById(chatId);
   useEffect(() => {
     if (data) {
-      console.log("Data is available:", data);
       setChatInfo(data);
     }
-  }, [data, setChatInfo]);
+  }, [data, setChatInfo, chatId]);
 
-  const endRef = useRef(null);
   useEffect(() => {
-    endRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [chatHistory]);
+    scrollValueRef.current = 0;
+  }, []);
 
+  const scrollValueRef = useRef(null);
+
+  const handleScroll = (e) => {
+    if (scrolltoEnd && scrollValueRef.current <= e.target.scrollTop) {
+      console.log("scrolling down");
+      scrollValueRef.current = e.target.scrollTop;
+    } else {
+      setScrollToEnd(false);
+    }
+  };
   return (
-    <div className="chat">
+    <div className="chatHistory" onScroll={handleScroll}>
       {isPending
         ? "Loading..."
         : error
@@ -47,7 +57,7 @@ const ChatHistory = () => {
                 <ModelMessage msg={message.parts[0].text} />
               </div>
             ))}
-      <div className="endChat" ref={endRef}></div>
+      <EndChat />
     </div>
   );
 };

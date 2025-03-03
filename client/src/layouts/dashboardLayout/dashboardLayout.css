@@ -1,15 +1,91 @@
 .dashboardLayout {
   display: flex;
-  gap: 50px;
-  padding-top: 20px;
+  height: 100vh;
+  position: relative;
+}
+
+.menu {
+  width: 280px;
   height: 100%;
+  background-color: #1a1a1a;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+}
 
+/* Default state - sidebar is hidden on mobile */
+@media (max-width: 1024px) {
   .menu {
-    flex: 1;
+    transform: translateX(-100%);
   }
+  
+  .menu.open {
+    transform: translateX(0);
+  }
+}
 
+.content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+/* Add padding for content when menu is always visible */
+@media (min-width: 1025px) {
   .content {
-    flex: 4;
-    background-color: #12101b;
+    margin-left: 280px;
   }
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #2c2937;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+.sidebar-open{
+  margin-left: 200px;
+  color:#2c2937;
+  background-color: white;
+}
+.sidebar-toggle:hover {
+  background-color: #3b3a47;
+}
+
+/* Hide toggle button on desktop if sidebar is always visible */
+@media (min-width: 1025px) {
+  .sidebar-toggle {
+    display: none;
+  }
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Adjust ChatList styling if needed */
+.menu .chatList {
+  width: 100%;
+  height: 100%;
 }

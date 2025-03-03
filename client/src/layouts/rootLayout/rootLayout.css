@@ -7,19 +7,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: .2rem 1rem;
+    height: 4rem;
 
-    .logo {
-      display: flex;
-      align-items: center;
-      font-weight: bold;
-      gap: 8px;
-
-      img {
-        width: 32px;
-        height: 32px;
-      }
+    .user{
+      margin-left: auto;
     }
+    z-index: 10;
+
   }
+  
 
   main {
     flex: 1;

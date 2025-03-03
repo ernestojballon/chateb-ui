@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-bottom: 5rem;
 
   .texts {
     flex: 1;
@@ -60,11 +61,12 @@
     }
   }
   .formContainer {
-    margin-top: auto;
+    
     width: 50%;
     background-color: #2c2937;
     border-radius: 20px;
     display: flex;
+    margin-bottom: 2rem;
 
     form {
       width: 100%;
@@ -101,4 +103,28 @@
       }
     }
   }
+  .formContainer button.loading {
+  background-color: #454351;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.formContainer input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 }

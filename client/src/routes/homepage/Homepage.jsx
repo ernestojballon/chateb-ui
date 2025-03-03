@@ -30,8 +30,8 @@ const Homepage = () => {
                 typingStatus === "human1"
                   ? "/human1.jpeg"
                   : typingStatus === "human2"
-                  ? "/human2.jpeg"
-                  : "bot.png"
+                    ? "/human2.jpeg"
+                    : "bot.png"
               }
               alt=""
             />

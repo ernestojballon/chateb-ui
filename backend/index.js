@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import Chat from "./models/chat.js";
 import UserChats from "./models/userChats.js";
 import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
+import geminiRouter from "./routes/geminiRouter.js";
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -148,6 +149,29 @@ app.put("/api/chats/:id", ClerkExpressRequireAuth(), async (req, res) => {
     res.status(500).send("Error adding conversation!");
   }
 });
+
+app.delete("/api/chats/:id", ClerkExpressRequireAuth(), async (req, res) => {
+  const userId = req.auth.userId;
+  const chatId = req.params.id;
+
+  try {
+    // Delete the chat
+    await Chat.findOneAndDelete({ _id: chatId, userId });
+    
+    // Also update the UserChats collection to remove this chat
+    await UserChats.updateOne(
+      { userId },
+      { $pull: { chats: { _id: chatId } } }
+    );
+
+    res.status(200).send({ success: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error deleting chat!");
+  }
+});
+
+app.use("/api/gemini",geminiRouter); 
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -15,7 +15,18 @@ const NewPrompt = () => {
     chatHistory,
     preAddUserMsgToChatHistory,
     preAddModelMsgToChatHistory,
+    setScrollToEnd,
   } = useStore();
+
+  useEffect(() => {
+    if (chatHistory.length === 1) {
+      const firstMessage = chatHistory[0].parts[0].text;
+      if (firstMessage) {
+        handleSubmit(firstMessage);
+      }
+    }
+  }, [chatHistory]);
+
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
@@ -47,46 +58,83 @@ const NewPrompt = () => {
     });
   };
 
-  const newMutation = useUpdateChat(chatId, {
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["chat", chatId] }).then(() => {
-        resetForm();
-      });
-    },
-  });
+  const sendMessageToBackend = async (text) => {
+    // Format text properly
+    const formattedText =
+      typeof text === "object" ? JSON.stringify(text, null, 2) : String(text);
 
-  const add = async (text) => {
-    preAddUserMsgToChatHistory({
-      text: text,
-      img: img.dbData?.filePath,
-    });
-    try {
-      const result = await chat.sendMessageStream(
-        Object.entries(img.aiData).length ? [img.aiData, text] : [text],
-      );
-      let accumulatedText = "";
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        accumulatedText += chunkText;
-        preAddModelMsgToChatHistory({
-          text: accumulatedText,
-        });
-      }
-
-      newMutation.mutate({
-        question: text,
-        answer: accumulatedText,
+    // Add user message to chat history immediately for UI
+    if (chatHistory.length !== 1) {
+      preAddUserMsgToChatHistory({
+        text: formattedText,
         img: img.dbData?.filePath,
       });
+    }
+
+    try {
+      // Show loading state in UI
+      preAddModelMsgToChatHistory({
+        text: "Thinking...",
+      });
+
+      // Make the POST request to get the AI response
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/gemini/stream/${chatId}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: formattedText,
+            imageUrl: img.dbData?.filePath || undefined,
+          }),
+        },
+      );
+      const reader = response.body.getReader();
+      let accumulatedText = "";
+
+      try {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) {
+            break;
+          }
+
+          // Convert the Uint8Array to a string
+          const chunk = new TextDecoder().decode(value);
+          console.log("chunk:", chunk);
+          const text = JSON.parse(
+            chunk.replace("data:", "").replace(/—/g, "\\u2014"),
+          ).response;
+          accumulatedText += text;
+          preAddModelMsgToChatHistory({
+            text: accumulatedText,
+          });
+        }
+      } catch (err) {
+        console.error("Error reading stream:", err);
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      resetForm();
+      setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.error("Failed to send message:", err);
+      // preAddModelMsgToChatHistory({
+      //   text: "Sorry, there was an error processing your request.",
+      // });
+      setIsLoading(false);
     }
   };
-
   const handleSubmit = async (text) => {
     if (!text) return;
+    setScrollToEnd(true);
     setIsLoading(true);
-    await add(text);
+    await sendMessageToBackend(text);
     setIsLoading(false);
   };
 
@@ -96,7 +144,8 @@ const NewPrompt = () => {
   useEffect(() => {
     if (!hasRun.current) {
       if (chatHistory.length === 1) {
-        add(chatHistory[0].parts[0].text, true);
+        // add(chatHistory[0].parts[0].text);
+        sendMessageToBackend(chatHistory[0].parts[0].text);
       }
     }
     hasRun.current = true;
@@ -117,20 +166,6 @@ const NewPrompt = () => {
     }
   };
 
-  const handleKeyDown = (e) => {
-    // Allow Shift+Enter for new line
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-
-    // Auto resize the textarea
-    const textarea = e.target;
-    setTimeout(() => {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }, 0);
-  };
   return (
     <div className="newPrompt">
       {/* ADD NEW CHAT */}
@@ -153,9 +188,8 @@ const NewPrompt = () => {
       </div>
       <form className="newForm" onSubmit={handleSubmit} ref={formRef}>
         <Upload setImg={setImg} uploadRef={uploadRef} />
-        <input id="file" type="file" multiple={false} hidden />
+        <input id="file" type="file" multiple={true} hidden />
         <MultilineInput onSubmit={handleSubmit} disabled={isLoading} />
-        {/* <input type="text" name="text" placeholder="Ask anything..." /> */}
         <button>
           <img src="/arrow.png" alt="" />
         </button>

@@ -1,25 +1,14 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import "./dashboardPage.css";
 import { useNavigate } from "react-router-dom";
+import { useCreateChat } from "../../apiCalls/useCreateChat";
 
 const DashboardPage = () => {
   const queryClient = useQueryClient();
-
   const navigate = useNavigate();
 
-  const mutation = useMutation({
-    mutationFn: (text) => {
-      return fetch(`${import.meta.env.VITE_API_URL}/api/chats`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      }).then((res) => res.json());
-    },
+  const mutation = useCreateChat({
     onSuccess: (id) => {
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ["userChats"] });
       navigate(`/dashboard/chats/${id}`);
     },
@@ -32,12 +21,13 @@ const DashboardPage = () => {
 
     mutation.mutate(text);
   };
+
   return (
     <div className="dashboardPage">
       <div className="texts">
         <div className="logo">
           <img src="/logo.png" alt="" />
-          <h1>LAMA AI</h1>
+          <h1>BALLONAI</h1>
         </div>
         <div className="options">
           <div className="option">
@@ -56,9 +46,26 @@ const DashboardPage = () => {
       </div>
       <div className="formContainer">
         <form onSubmit={handleSubmit}>
-          <input type="text" name="text" placeholder="Ask me anything..." />
-          <button>
-            <img src="/arrow.png" alt="" />
+          <input
+            type="text"
+            name="text"
+            placeholder={
+              mutation.isPending ? "Creating new chat..." : "Ask me anything..."
+            }
+            disabled={mutation.isPending}
+            autoComplete="off" // This line disables autocomplete
+            spellCheck="false" // This can also help reduce suggestions
+          />
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className={mutation.isPending ? "loading" : ""}
+          >
+            {mutation.isPending ? (
+              <div className="spinner"></div>
+            ) : (
+              <img src="/arrow.png" alt="" />
+            )}
           </button>
         </form>
       </div>

@@ -1,11 +1,17 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { getChatId } from '../helpers/useGetChatId';
 
 const store = (set) => ({
-  chatId: null,
+  isSidebarOpen: false,
+  setIsSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+  scrolltoEnd: true,
+  setScrollToEnd: (scrollToEnd) => set({ scrolltoEnd: scrollToEnd }),
+  chatId: getChatId(),
   apiCallsReferences: {},
   chatHistory: [],
   userId: null,
+
   setChatId: (newChatId) => set({ chatId: newChatId }, false, "Setting Up ChatId"),
   setChatInfo: (data) => set((state) => ({
     chatHistory: data?.history || [],
@@ -28,20 +34,13 @@ const store = (set) => ({
     { type: 'chat/updateHistory', description: 'Pre adding user message' }
   ),
   preAddModelMsgToChatHistory: (chatEntry) => set((state) => {
-    console.log({
-      chatEntry
-    })
+
     const chatHistory = [...state.chatHistory]; // Create a copy to avoid direct state mutation
 
     // Check if array has items and if the last one is a model message
     const lastIndex = chatHistory.length - 1;
     const isLastOneModel = lastIndex >= 0 && chatHistory[lastIndex].role === "model";
 
-    console.log({
-      lastIndex,
-      isLastOneModel,
-      lastElem: chatHistory[lastIndex]
-    })
     if (isLastOneModel) {
       // Update the last object in the array
       chatHistory[lastIndex].parts = [{

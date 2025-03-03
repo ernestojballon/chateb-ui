@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-export const useChatData = (chatId) => {
-  console.log({ chatId });
+export const useGetChatDataById = (chatId) => {
   return useQuery({
     queryKey: ["chat", chatId],
     queryFn: () =>
