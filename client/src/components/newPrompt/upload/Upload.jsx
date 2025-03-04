@@ -1,5 +1,6 @@
 import { IKContext, IKUpload } from "imagekitio-react";
 import { useRef } from "react";
+import useNewPromptStore from "../../../store/newPromptStore.store.ts";
 
 const urlEndpoint = import.meta.env.VITE_IMAGE_KIT_ENDPOINT;
 const publicKey = import.meta.env.VITE_IMAGE_KIT_PUBLIC_KEY;
@@ -23,11 +24,12 @@ const authenticator = async () => {
   }
 };
 
-const Upload = ({ setImg, uploadRef }) => {
+const Upload = () => {
+  const { addAttachment, setAttachmentLoading } = useNewPromptStore();
   const ikUploadRef = useRef(null);
 
   // Use the external ref if provided, otherwise use the local ref
-  const finalRef = uploadRef || ikUploadRef;
+  const finalRef = ikUploadRef;
 
   const onError = (err) => {
     console.log("Error", err);
@@ -35,7 +37,8 @@ const Upload = ({ setImg, uploadRef }) => {
 
   const onSuccess = (res) => {
     console.log("Success", res);
-    setImg((prev) => ({ ...prev, isLoading: false, dbData: res }));
+    addAttachment(res);
+    setAttachmentLoading(false);
   };
 
   const onUploadProgress = (progress) => {
@@ -47,16 +50,7 @@ const Upload = ({ setImg, uploadRef }) => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImg((prev) => ({
-        ...prev,
-        isLoading: true,
-        aiData: {
-          inlineData: {
-            data: reader.result.split(",")[1],
-            mimeType: file.type,
-          },
-        },
-      }));
+      setAttachmentLoading(true);
     };
     reader.readAsDataURL(file);
   };
@@ -78,9 +72,11 @@ const Upload = ({ setImg, uploadRef }) => {
         ref={finalRef}
       />
       {
-        <label onClick={() => finalRef.current.click()}>
-          <img src="/attachment.png" alt="" />
-        </label>
+        <>
+          <label onClick={() => finalRef.current.click()}>
+            <img src="/attachment.png" alt="" />
+          </label>
+        </>
       }
     </IKContext>
   );

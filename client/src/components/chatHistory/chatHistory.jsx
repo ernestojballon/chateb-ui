@@ -4,12 +4,11 @@ import useStore from "../../store";
 import { IKImage } from "imagekitio-react";
 import "./chatHistory.css";
 import ModelMessage from "./modelMessage/modelMessage";
-import useGetChatId from "../../helpers/useGetChatId";
 import EndChat from "./endChat.js/endChat";
 
 const ChatHistory = () => {
-  const [chatId] = useGetChatId();
-  const { setChatInfo, chatHistory, scrolltoEnd, setScrollToEnd } = useStore();
+  const { chatId, setChatInfo, chatHistory, scrolltoEnd, setScrollToEnd } =
+    useStore();
   const { isPending, error, data } = useGetChatDataById(chatId);
   useEffect(() => {
     if (data) {
@@ -19,7 +18,7 @@ const ChatHistory = () => {
 
   useEffect(() => {
     scrollValueRef.current = 0;
-  }, []);
+  }, [chatId]);
 
   const scrollValueRef = useRef(null);
 
@@ -42,18 +41,21 @@ const ChatHistory = () => {
                 className={message.role === "user" ? "message user" : "message"}
                 key={i}
               >
-                {message.img && (
-                  <IKImage
-                    className={"message user userImage"}
-                    urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
-                    path={message.img}
-                    height="200"
-                    width="200"
-                    transformation={[{ height: 200, width: 200 }]}
-                    loading="lazy"
-                    lqip={{ active: true, quality: 20 }}
-                  />
-                )}
+                {message?.attachments?.length
+                  ? message.attachments.map((attachment, i) => (
+                      <div key={i} className="message user userImage">
+                        <IKImage
+                          urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
+                          path={attachment.filePath}
+                          height="200"
+                          width="200"
+                          transformation={[{ height: 200, width: 200 }]}
+                          loading="lazy"
+                          lqip={{ active: true, quality: 20 }}
+                        />
+                      </div>
+                    ))
+                  : null}
                 <ModelMessage msg={message.parts[0].text} />
               </div>
             ))}

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import "./newPrompt.css";
-import Upload from "../upload/Upload";
-import { IKImage } from "imagekitio-react";
-import model from "../../lib/gemini";
+import Upload from "./upload/Upload";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUpdateChat } from "../../apiCalls/useUpdateChat";
 import useStore from "../../store";
-import { MdCancel } from "react-icons/md";
 import MultilineInput from "./multilineInput/multilineInput";
+import { useCreateChat } from "../../apiCalls/useCreateChat";
+import { useNavigate } from "react-router-dom";
+import useNewPromptStore from "../../store/newPromptStore.store";
+import PromptAttachements from "./promptAttachements/PromptAttachements";
 
 const NewPrompt = () => {
   const {
@@ -17,6 +17,8 @@ const NewPrompt = () => {
     preAddModelMsgToChatHistory,
     setScrollToEnd,
   } = useStore();
+
+  const { attachments } = useNewPromptStore();
 
   useEffect(() => {
     if (chatHistory.length === 1) {
@@ -31,19 +33,8 @@ const NewPrompt = () => {
     isLoading: false,
     error: "",
     dbData: {},
-    aiData: {},
   });
   const [isLoading, setIsLoading] = useState(false);
-  const chat = model.startChat({
-    history: chatHistory?.map(({ role, parts }) => ({
-      role: role,
-      parts: [{ text: parts[0].text }],
-    })),
-
-    generationConfig: {
-      // maxOutputTokens: 100,
-    },
-  });
 
   const formRef = useRef(null);
 
@@ -57,7 +48,13 @@ const NewPrompt = () => {
       aiData: {},
     });
   };
-
+  const navigate = useNavigate();
+  const mutation = useCreateChat({
+    onSuccess: (id) => {
+      queryClient.invalidateQueries({ queryKey: ["userChats"] });
+      navigate(`/dashboard/chats/${id}`);
+    },
+  });
   const sendMessageToBackend = async (text) => {
     // Format text properly
     const formattedText =
@@ -77,6 +74,10 @@ const NewPrompt = () => {
         text: "Thinking...",
       });
 
+      if (!chatId) {
+        await mutation.mutate(text);
+      }
+      console.log({ attachments });
       // Make the POST request to get the AI response
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/gemini/stream/${chatId}`,
@@ -88,7 +89,7 @@ const NewPrompt = () => {
           },
           body: JSON.stringify({
             text: formattedText,
-            imageUrl: img.dbData?.filePath || undefined,
+            attachments: attachments || undefined,
           }),
         },
       );
@@ -124,9 +125,9 @@ const NewPrompt = () => {
       setIsLoading(false);
     } catch (err) {
       console.error("Failed to send message:", err);
-      // preAddModelMsgToChatHistory({
-      //   text: "Sorry, there was an error processing your request.",
-      // });
+      preAddModelMsgToChatHistory({
+        text: "Sorry, there was an error processing your request.",
+      });
       setIsLoading(false);
     }
   };
@@ -151,44 +152,14 @@ const NewPrompt = () => {
     hasRun.current = true;
   }, []);
 
-  const handleRemoveImage = (e) => {
-    e.preventDefault();
-    setImg({
-      isLoading: false,
-      error: "",
-      dbData: {},
-      aiData: {},
-    });
-    // Reset the upload component if needed
-    if (uploadRef.current) {
-      // This will clear the file input
-      uploadRef.current.value = "";
-    }
-  };
-
   return (
     <div className="newPrompt">
       {/* ADD NEW CHAT */}
-      <div className="tempImg">
-        {img.isLoading && <div className="">Loading...</div>}
+      <PromptAttachements />
 
-        {img.dbData?.filePath && (
-          <div className="thumbnailImg">
-            <span onClick={handleRemoveImage} className="cancelButton">
-              <MdCancel color="#2c2937" size={24} />
-            </span>
-            <IKImage
-              urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
-              path={img.dbData?.filePath}
-              width="100"
-              transformation={[{ width: 100, height: 100 }]}
-            />
-          </div>
-        )}
-      </div>
       <form className="newForm" onSubmit={handleSubmit} ref={formRef}>
-        <Upload setImg={setImg} uploadRef={uploadRef} />
-        <input id="file" type="file" multiple={true} hidden />
+        <Upload />
+
         <MultilineInput onSubmit={handleSubmit} disabled={isLoading} />
         <button>
           <img src="/arrow.png" alt="" />

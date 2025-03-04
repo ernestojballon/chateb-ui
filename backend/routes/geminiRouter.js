@@ -1,43 +1,44 @@
 // server.js or routes/chat.js
 import express from "express";
 import axios from "axios";
-import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
-import Chat from "../models/chat.js";
+import Chat from "../db/models/chat.js";
 import model from "../lib/gemini.js";
 
 const router = express.Router();
 
 
 // Streaming endpoint for chat messages
-router.post("/stream/:chatId", ClerkExpressRequireAuth(), async (req, res) => {
+router.post("/stream/:chatId", async (req, res) => {
   const userId = req.auth.userId;
   const chatId = req.params.chatId;
-  const { text ,imageUrl} = req.body;
+  if(!userId) return res.status(401).json({error: "Unauthorized"});
+  if(!chatId) return res.status(400).json({error: "Chat ID is required"});
+  const { text , attachments} = req.body;
 
   try {
     // Get the chat to check ownership and get history
     const chat = await Chat.findOne({ _id: chatId, userId });
     
     if (!chat) {
-      return res.status(404).json({ error: "Chat not found" });
+      return res.status(404).json({ error: "Chat not found",chat,chatId,userId });
     }
 
-    const imageData = await axios.get(process.env.IMAGE_KIT_ENDPOINT + imageUrl, {
-      responseType: 'arraybuffer'
-    }).then(response => Buffer.from(response.data, 'binary').toString('base64')).catch(err => {
-      console.error("Error fetching image:", err);
-      return null;
-    }
-    );
-
-    const aiData = {
-      inlineData: {
-        data: imageData,
-        mimeType: 'image/png',
-      },
-    };
-
-
+    const attachmentsData = await Promise.all (attachments.map(async (attachment) => {
+      const imageData = await axios.get(process.env.IMAGE_KIT_ENDPOINT + attachment.filePath, {
+        responseType: 'arraybuffer'
+      }).then(response => Buffer.from(response.data, 'binary').toString('base64')).catch(err => {
+        console.error("Error fetching image:", err);
+        return null;
+      }
+      );
+      return {
+        inlineData: {
+          data: imageData,
+          mimeType: 'image/png',
+        },
+      };
+    }))
+    
     
     // Format chat history
     const formattedHistory = chat.history.map(({ role, parts }) => ({
@@ -51,7 +52,7 @@ router.post("/stream/:chatId", ClerkExpressRequireAuth(), async (req, res) => {
     });
 
     // Send message
-    const messageParts = imageUrl ? [aiData, text] : [text];
+    const messageParts = attachmentsData.length ? [...attachmentsData,text] : [text];
     const result = await chatSession.sendMessageStream(messageParts);
 
     for await (const chunk of result.stream) {
@@ -62,6 +63,7 @@ router.post("/stream/:chatId", ClerkExpressRequireAuth(), async (req, res) => {
     }
     const response = await result.response;
     // Update database
+  
     await Chat.updateOne(
       { _id: chatId, userId },
       {
@@ -70,7 +72,9 @@ router.post("/stream/:chatId", ClerkExpressRequireAuth(), async (req, res) => {
             { 
               role: "user", 
               parts: [{ text }],
-              ...(imageUrl && { img: imageUrl }) 
+              
+              ...(attachmentsData.length && { attachments: attachments.map(attachment =>( {filePath:attachment.filePath})),
+               }) 
             },
             { 
               role: "model", 

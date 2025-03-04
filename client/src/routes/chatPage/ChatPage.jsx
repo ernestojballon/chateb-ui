@@ -5,7 +5,9 @@ import { useEffect } from "react";
 import ChatHistory from "../../components/chatHistory/chatHistory";
 
 const ChatPage = () => {
-  const { chatId, setChatId } = useStore();
+  const { setChatId } = useStore();
+  const path = window.location.pathname;
+  const chatId = path.split("/").pop();
 
   useEffect(() => {
     setChatId(chatId);

@@ -31,6 +31,11 @@ const ChatList = () => {
     setChatId(chatId);
     navigate(`/dashboard/chats/${chatId}`);
   };
+  const newChatHandler = () => {
+    setIsSidebarOpen(false);
+    setChatId(null);
+    navigate("/dashboard");
+  };
   return (
     <div className="chatList">
       <div to="/dashboard" className="logo">
@@ -38,7 +43,12 @@ const ChatList = () => {
         <span>BALLONAI</span>
       </div>
       <span className="title">DASHBOARD</span>
-      <Link to="/dashboard">Open a new Chat</Link>
+      <div
+        onClick={newChatHandler}
+        className={`chat-item newChat ${chatId === null ? "active" : ""}`}
+      >
+        Open a new Chat
+      </div>
       <hr />
       <span className="title">RECENT CHATS</span>
       <div className="list">

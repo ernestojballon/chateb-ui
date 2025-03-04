@@ -1,16 +1,16 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { getChatId } from '../helpers/useGetChatId';
 
 const store = (set) => ({
   isSidebarOpen: false,
   setIsSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
   scrolltoEnd: true,
   setScrollToEnd: (scrollToEnd) => set({ scrolltoEnd: scrollToEnd }),
-  chatId: getChatId(),
+  chatId: null,
   apiCallsReferences: {},
   chatHistory: [],
   userId: null,
+
 
   setChatId: (newChatId) => set({ chatId: newChatId }, false, "Setting Up ChatId"),
   setChatInfo: (data) => set((state) => ({
