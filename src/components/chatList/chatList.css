@@ -1,0 +1,190 @@
+.chatList {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem; /* Add padding to the list */
+  height: 100%;
+  
+  
+  hr {
+    border: none;
+    height: 1px; /* Slightly thinner hr */
+    background-color: #333; /* Darker grey for better contrast */
+    opacity: 0.5; /* Slightly more visible */
+    margin: 15px 0; /* Adjusted margin */
+  }
+  .logo{
+    margin: 20px;
+    color:white;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    img {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+  .logo span {
+  font-weight: 700;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #217bfe, #e55571);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: 1px;
+  position: relative;
+  padding-bottom: 2px;
+  text-shadow: 0 2px 10px rgba(58, 123, 213, 0.2);
+  transition: all 0.3s ease;
+}
+.logo blockquote {
+  font-size: .9rem;
+  color: #666;
+  font-weight: 300;
+}
+
+
+
+
+
+
+  .title {
+    font-weight: 600;
+    font-size: 12px; /* Slightly larger font size for better readability */
+    text-transform: uppercase; /* For a consistent look */
+    color: #888; /* Lighter grey for better contrast */
+    margin-bottom: 10px;
+    padding: 5px 10px; /* Add some padding for better look */
+    border-radius: 5px; /* Match hr border radius */
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Allow list to take up available space */
+    overflow-y: auto; /* Only scroll vertically */
+    gap: .2rem; /* Add space between items */
+    
+    
+  }
+
+  a {
+    padding: 10px 15px; /* Added horizontal padding */
+    border-radius: 10px;
+    text-decoration: none; /* Remove default underline */
+    color: white; /* Set text color to white */
+    background-color: #444; /* Dark grey background for better contrast */
+    margin-bottom: 5px; /* Add space between links */
+    transition: background-color 0.2s ease; /* Smooth transition for hover */
+
+    &:hover {
+      background-color: #2c2937; /* Darker hover color */
+    }
+  }
+}
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    background-color: #2c2937;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    gap: 1rem;
+    min-height: 2rem;
+    text-decoration: none;
+    /* remove default button styles */
+    border: none;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    a {
+      flex: 1;
+      padding: 12px 16px;
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+      max-width: calc(100% - 40px);
+      background-color: transparent;
+      
+      &:hover {
+        background-color: transparent;
+        transform: none;
+        box-shadow: none;
+      }
+    }
+    .chat-link {
+      flex: 1;
+      padding: 10px 15px;
+      color: #e0e0e0;
+      cursor: pointer;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+    }
+
+.chat-link:hover {
+  color: white;
+}
+    .delete-btn {
+      height: 100%;
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      color: #8a8a9b;
+      font-size: 14px;
+      opacity: 0;
+      transition: all 0.2s ease;
+      padding: 0;
+      border-radius: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &:hover {
+        background-color: rgba(255, 59, 59, 0.15);
+        color: #ff5b5b;
+      }
+      
+      &:active {
+        background-color: rgba(255, 59, 59, 0.25);
+      }
+    }
+    
+    &:hover .delete-btn {
+      opacity: 1;
+    }
+  }
+.chat-item.active {
+  /* background-color: #f5f5f5; Light gray background */
+  font-weight: bold;
+  border-left: 3px solid #6b5de0; /* A subtle blue border */
+}
+.chat-item.active a {
+  color: #6b5de0; /* Match the border color */
+}
+.newChat{
+    padding: 10px 15px; /* Added horizontal padding */
+    border-radius: 10px;
+    text-decoration: none; /* Remove default underline */
+    color: white; /* Set text color to white */
+    background-color: #444; /* Dark grey background for better contrast */
+    margin-bottom: 5px; /* Add space between links */
+    transition: background-color 0.2s ease; /* Smooth transition for hover */
+
+    &:hover {
+      background-color: #2c2937; /* Darker hover color */
+    }
+  }
