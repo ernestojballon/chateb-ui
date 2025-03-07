@@ -8,6 +8,7 @@ import useNewPromptStore from "../../store/newPromptStore.store";
 import PromptAttachements from "./promptAttachements/PromptAttachements";
 import { useAuth } from "@clerk/clerk-react"; // Or however you're importing Clerk
 import useSentMessageToChat from "../../apiCalls/useSentMessageToChat";
+import { useEffect } from "react";
 
 const NewPrompt = () => {
   const { getToken } = useAuth();
@@ -17,7 +18,8 @@ const NewPrompt = () => {
     preAddModelMsgToChatHistory,
     setScrollToEnd,
   } = useStore();
-  // const { } =useSentMessageToChat();
+  const [isStreaming, streamedText, setStreamedText, sendMessageToBackend] =
+    useSentMessageToChat();
   const { attachments, clearAttachments } = useNewPromptStore();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -28,81 +30,15 @@ const NewPrompt = () => {
   const resetForm = () => {
     formRef.current.reset();
   };
-  const sendMessageToBackend = async (text) => {
-    // Format text properly
-    const formattedText =
-      typeof text === "object" ? JSON.stringify(text, null, 2) : String(text);
 
-    // Add user message to chat history immediately for UI
-
-    preAddUserMsgToChatHistory({
-      text: formattedText,
-      attachments,
-    });
-
-    try {
-      // Show loading state in UI
-      preAddModelMsgToChatHistory({
-        text: "Thinking...",
+  useEffect(() => {
+    if (isStreaming) {
+      return preAddModelMsgToChatHistory({
+        text: streamedText,
       });
-
-      console.log({ attachments });
-      // Make the POST request to get the AI response
-      const token = await getToken();
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/gemini/stream/${chatId}`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            text: formattedText,
-            attachments: attachments || undefined,
-          }),
-        },
-      );
-      clearAttachments();
-      const reader = response.body.getReader();
-      let accumulatedText = "";
-
-      try {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
-          }
-
-          // Convert the Uint8Array to a string
-          const chunk = new TextDecoder().decode(value);
-          console.log("chunk:", chunk);
-          const text = JSON.parse(
-            chunk.replace("data:", "").replace(/—/g, "\\u2014"),
-          ).response;
-          accumulatedText += text;
-          preAddModelMsgToChatHistory({
-            text: accumulatedText,
-          });
-        }
-      } catch (err) {
-        console.error("Error reading stream:", err);
-      }
-
-      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-      resetForm();
-      setIsLoading(false);
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      preAddModelMsgToChatHistory({
-        text: "Sorry, there was an error processing your request.",
-      });
-      setIsLoading(false);
     }
-  };
+    setStreamedText("");
+  }, [isStreaming, streamedText, preAddModelMsgToChatHistory, setStreamedText]);
 
   const multilineInputRef = useRef(null);
   const handleSubmit = async (e) => {
@@ -115,7 +51,29 @@ const NewPrompt = () => {
   const startStream = async (text) => {
     setScrollToEnd(true);
     setIsLoading(true);
-    await sendMessageToBackend(text);
+    const formattedText =
+      typeof text === "object" ? JSON.stringify(text, null, 2) : String(text);
+    preAddUserMsgToChatHistory({
+      text: formattedText,
+      attachments,
+    });
+    preAddModelMsgToChatHistory({
+      text: "Thinking...",
+    });
+    try {
+      await sendMessageToBackend(chatId, { text: formattedText, attachments });
+      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      resetForm();
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      preAddModelMsgToChatHistory({
+        text: "Sorry, there was an error processing your request.",
+      });
+      setIsLoading(false);
+    }
+
+    clearAttachments();
     setIsLoading(false);
     setTimeout(() => multilineInputRef.current?.focus(), 100);
   };

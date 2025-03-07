@@ -1,26 +1,7 @@
-import React from "react";
 import { useState } from "react";
 import { useAuth } from "@clerk/clerk-react"; // Or however you're importing Clerk
 
-const sendMessageToBackend = async ({ chatId, text, token, attachments }) => {
-  const body = { text, attachments: attachments || undefined };
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/api/gemini/stream/${chatId}`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    },
-  );
-
-  return response;
-};
-
-const useSentMessageToChat = async () => {
+const useSentMessageToChat = () => {
   const [streamedText, setStreamedText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const { getToken } = useAuth();
@@ -73,12 +54,7 @@ const useSentMessageToChat = async () => {
     setIsStreaming(false);
   };
 
-  return {
-    isStreaming,
-    streamedText,
-    setStreamedText,
-    sendMessageToBackend,
-  };
+  return [isStreaming, streamedText, setStreamedText, sendMessageToBackend];
 };
 
 export default useSentMessageToChat;
