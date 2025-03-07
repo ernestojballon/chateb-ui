@@ -8,6 +8,7 @@ import "./multilineInput.css";
 
 const MultilineInput = forwardRef(({ startStream, disabled = false }, ref) => {
   const textareaRef = useRef(null);
+  const originalHeight = useRef(null); // Store original height
 
   // Expose the textarea ref and methods to parent components
   useImperativeHandle(ref, () => ({
@@ -22,7 +23,7 @@ const MultilineInput = forwardRef(({ startStream, disabled = false }, ref) => {
     clear: () => {
       if (textareaRef.current) {
         textareaRef.current.value = "";
-        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = originalHeight.current + "px"; // Restore original height
       }
     },
     // Expose the underlying DOM element
@@ -34,16 +35,28 @@ const MultilineInput = forwardRef(({ startStream, disabled = false }, ref) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    textarea.style.height = "auto"; // crucial to reset height before getting scrollHeight
+    let height = textarea.scrollHeight; // Get scrollHeight after resetting
+
+    // Adjust height to account for padding and borders (optional, adjust as needed)
+    const paddingAndBorder =
+      parseInt(window.getComputedStyle(textarea).paddingTop) +
+      parseInt(window.getComputedStyle(textarea).paddingBottom) +
+      parseInt(window.getComputedStyle(textarea).borderTopWidth) +
+      parseInt(window.getComputedStyle(textarea).borderBottomWidth);
+    height += paddingAndBorder;
+
+    textarea.style.height = `${height}px`;
+    if (originalHeight.current === null) {
+      originalHeight.current = height;
+    }
   };
 
   // Handle Enter and Shift+Enter
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       if (e.shiftKey) {
-        return;
-        // Allow Shift+Enter to create a new line (default behavior)
+        return; // Allow Shift+Enter to create a new line
       }
       // Submit on Enter
       e.preventDefault();
@@ -51,8 +64,8 @@ const MultilineInput = forwardRef(({ startStream, disabled = false }, ref) => {
       const text = e.target.value.trim();
       if (text && !disabled) {
         startStream(text);
-        e.target.value = "";
-        e.target.style.height = "auto";
+        textareaRef.current.value = "";
+        autoResize(); //call autoResize to reset the height to original after clear
       }
     }
   };

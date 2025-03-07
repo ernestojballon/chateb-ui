@@ -6,17 +6,18 @@ import useStore from "../../store";
 import MultilineInput from "./multilineInput/multilineInput";
 import useNewPromptStore from "../../store/newPromptStore.store";
 import PromptAttachements from "./promptAttachements/PromptAttachements";
-import { useAuth } from "@clerk/clerk-react"; // Or however you're importing Clerk
 import useSentMessageToChat from "../../apiCalls/useSentMessageToChat";
 import { useEffect } from "react";
+import { useRenameChat } from "../../apiCalls/useRenameChat"; // Path to your hook
 
 const NewPrompt = () => {
-  const { getToken } = useAuth();
+  const renameChatMutation = useRenameChat();
   const {
     chatId,
     preAddUserMsgToChatHistory,
     preAddModelMsgToChatHistory,
     setScrollToEnd,
+    chatHistory,
   } = useStore();
   const [isStreaming, streamedText, setStreamedText, sendMessageToBackend] =
     useSentMessageToChat();
@@ -62,6 +63,10 @@ const NewPrompt = () => {
     });
     try {
       await sendMessageToBackend(chatId, { text: formattedText, attachments });
+
+      if (chatHistory.length < 3) {
+        await renameChatMutation.mutateAsync({ chatId });
+      }
       await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
       resetForm();
       setIsLoading(false);

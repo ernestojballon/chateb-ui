@@ -6,14 +6,20 @@
       gap: 20px;
       padding: 0rem 2rem 9rem 2rem;
       overflow-y: scroll;
-overflow-x: hidden;
+      overflow-x: hidden;
       
       
       ul {
         padding-left: 1.5rem;
         margin: 1rem 0;
       }
-     
+     .chatHistory__spinner{
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      display: flex;
+      justify-content: center;
+     }
       .message {
         border-radius: 12px;
         font-size: 1rem;

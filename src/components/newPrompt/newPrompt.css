@@ -26,30 +26,7 @@
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     }
 
-    textarea {
-    flex: 1;
-    padding: 12px 0;
-    border: none;
-    outline: none;
-    background-color: transparent;
-    color: #ececec;
-    font-size: 16px;
-    font-family: inherit;
-    transition: color 0.2s ease;
-    resize: none;
-    overflow: hidden;
-    min-height: 24px;
-    max-height: 150px; /* Prevents too large textareas */
-    line-height: 1.5;
-    
-    &::placeholder {
-      color: rgba(236, 236, 236, 0.5);
-      transition: color 0.2s ease;
-    }
-    
-    &:focus::placeholder {
-      color: rgba(236, 236, 236, 0.3);
-    }
+   
   }
 
     button, label {
@@ -87,7 +64,7 @@
       }
     }
   }
-}
+
 
 /* Subtle focus animation */
 @keyframes pulse {

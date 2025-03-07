@@ -13,7 +13,7 @@ const useSentMessageToChat = () => {
     const token = await getToken();
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/gemini/stream/${chatId}`,
+      `${import.meta.env.VITE_API_URL}/api/llm/chat-message/${chatId}`,
       {
         method: "POST",
         credentials: "include",

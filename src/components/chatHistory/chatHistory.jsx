@@ -35,7 +35,9 @@ const ChatHistory = () => {
   return (
     <div className="chatHistory" onScroll={handleScroll}>
       {isPending ? (
-        <Spinner />
+        <div className="chatHistory__spinner">
+          <Spinner />
+        </div>
       ) : error ? (
         "Something went wrong!"
       ) : (
