@@ -9,6 +9,7 @@ import PromptAttachements from "./promptAttachements/PromptAttachements";
 import useSentMessageToChat from "../../apiCalls/useSentMessageToChat";
 import { useEffect } from "react";
 import { useRenameChat } from "../../apiCalls/useRenameChat"; // Path to your hook
+import Spinner from "../spinner/Spinner";
 
 const NewPrompt = () => {
   const renameChatMutation = useRenameChat();
@@ -92,9 +93,13 @@ const NewPrompt = () => {
           startStream={startStream}
           disabled={isLoading}
         />
-        <button type="submit">
-          <img src="/arrow.png" alt="" />
-        </button>
+        {isLoading ? (
+          <Spinner size={"tiny"} />
+        ) : (
+          <button type="submit">
+            <img src="/arrow.png" alt="" />
+          </button>
+        )}
       </form>
     </div>
   );

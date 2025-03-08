@@ -1,0 +1,37 @@
+.userMessageContainer{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+   .userMessage{
+    
+      width: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      background-color: #ececec;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      .message{
+        font-size: 1rem;
+        color: #333;
+      }
+      
+      .userImage {
+        padding: 1rem 1rem 0 1rem;
+        overflow: hidden;
+        img{
+          border-radius: 20px;
+        }
+      }
+
+   }
+   /* Add responsive styling */
+@media (max-width: 768px) {
+  .userMessage {
+                width: auto;
+    max-width: 70%;
+    margin: 1rem;
+  }
+}
+}

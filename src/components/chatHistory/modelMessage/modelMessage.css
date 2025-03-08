@@ -1,4 +1,62 @@
 /* List styling */
+.model-message-container {
+  position: relative;
+  padding: 1.5rem; /* Increased padding for better spacing */
+  max-width: 100%; /* Full width for better readability */
+  .model-message {
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    line-height: 1.7; /* Slightly increased line-height */
+    padding: 1rem;
+
+    .message {
+      font-size: 1rem; /* Maintain font size */
+      color: #333; /* Darker gray for better contrast */
+      font-family: sans-serif; /* Specify a sans-serif font for better readability */
+    }
+
+    strong {
+      font-size: 1.2rem;
+      font-weight: bold;
+      font-family: sans-serif; /* Consistent font family */
+      color: #222; /* Slightly darker for emphasis */
+    }
+
+    p {
+      line-height: 1.7; /* Consistent line-height with message */
+      font-family: sans-serif; /* Consistent font family */
+      margin-bottom: 0.5rem; /* Add spacing between paragraphs */
+      text-align: left; /* Justification for better flow (optional) */
+    }
+  }
+}
+  
+  
+  .copy-message {
+  position: absolute;
+  bottom: 0px;
+  left: 10px;
+  padding: 5px 10px;
+  margin-bottom:-30px;
+  background-color: #ececec; 
+  color: gray;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex; /* Use flexbox to align icon and text */
+  align-items: center; /* Vertically center items */
+  gap: 5px; /* Add space between icon and text */
+
+  &:hover {
+    background-color: #dedede;
+  }
+}
+
+
+
+
 .markdown-ul,
 .markdown-ol {
   padding-left: 1.5rem;
@@ -52,4 +110,12 @@
 .markdown-blockquote .markdown-ul,
 .markdown-blockquote .markdown-ol {
   margin: 0.5rem 0;
+}
+
+
+/* Add responsive styling */
+@media (max-width: 768px) {
+  .model-message-container  {
+    max-width: 100vw;
+  }
 }

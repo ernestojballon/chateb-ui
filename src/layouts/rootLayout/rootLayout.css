@@ -4,14 +4,22 @@
   flex-direction: column;
 
   header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .2rem 1rem;
-    height: 4rem;
-    background-color: #f8f9fa;
+        position: fixed;
+        z-index: 10;
+        top: 0;
+        right: 1rem;
+        z-index: 10;
+        width: 4rem;
+        height: 4rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     .user{
       margin-left: auto;
+    }
+    .cl-avatarBox{
+      width: 2rem;
+      height: 2rem;
     }
     z-index: 10;
 

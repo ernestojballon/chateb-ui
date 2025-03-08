@@ -97,6 +97,8 @@
     border: none;
     cursor: pointer;
     text-align: left;
+    font-size: .8rem;
+    color: #e0e0e0;
 
     &:hover {
       transform: translateY(-1px);

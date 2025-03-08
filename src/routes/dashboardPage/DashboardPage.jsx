@@ -1,27 +1,10 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import "./dashboardPage.css";
 import { useCreateNewChat } from "../../helpers/useCreateNewChat";
 import { useUser } from "@clerk/clerk-react";
 const DashboardPage = () => {
-  const { user, isLoaded, isSignedIn } = useUser();
-  const [recentChats, setRecentChats] = useState([]);
-  const navigate = useNavigate();
+  const { user } = useUser();
   const username = user?.username || user?.firstName || "User";
-  useEffect(() => {
-    // Fetch user data and recent chats
-    // This is where you'd make an API call to get user data and recent chats
-    // For now using placeholder data
-    setRecentChats([
-      { id: 1, title: "Project planning ideas", date: "Today" },
-      { id: 2, title: "JavaScript debugging help", date: "Yesterday" },
-      { id: 3, title: "Travel recommendations", date: "Mar 2" },
-    ]);
-  }, []);
 
-  const handleChatSelect = (chatId) => {
-    navigate(`/dashboard/chats/${chatId}`);
-  };
   const { createNewChat, isCreating } = useCreateNewChat();
   const handleNewChat = () => {
     createNewChat("New Chat");

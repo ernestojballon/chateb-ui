@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useGetChatDataById } from "../../apiCalls/useGetChatDataById";
 import useStore from "../../store";
-import { IKImage } from "imagekitio-react";
 import "./chatHistory.css";
 import ModelMessage from "./modelMessage/modelMessage";
 import EndChat from "./endChat.js/endChat";
 import Spinner from "../spinner/Spinner";
+import UserMessage from "./userMessage/userMessage";
 
 const ChatHistory = () => {
   const { chatId, setChatInfo, chatHistory, scrolltoEnd, setScrollToEnd } =
@@ -41,29 +41,24 @@ const ChatHistory = () => {
       ) : error ? (
         "Something went wrong!"
       ) : (
-        chatHistory?.map((message, i) => (
-          <div
-            className={message.role === "user" ? "message user" : "message"}
-            key={i}
-          >
-            {message?.attachments?.length
-              ? message.attachments.map((attachment, i) => (
-                  <div key={i} className="message user userImage">
-                    <IKImage
-                      urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
-                      path={attachment.filePath}
-                      height="100"
-                      width="100"
-                      transformation={[{ height: 200, width: 200 }]}
-                      loading="lazy"
-                      lqip={{ active: true, quality: 20 }}
-                    />
-                  </div>
-                ))
-              : null}
-            <ModelMessage msg={message.parts[0].text} />
-          </div>
-        ))
+        <>
+          {chatHistory?.map((message, i) =>
+            message.role === "model" ? (
+              <article className="messagesContainer" key={i}>
+                <ModelMessage msg={message.parts[0].text} />
+              </article>
+            ) : (
+              <article className="messagesContainer" key={i}>
+                <UserMessage
+                  attachments={
+                    message?.attachments?.length ? message.attachments : null
+                  }
+                  textMessage={message.parts[0].text}
+                />
+              </article>
+            ),
+          )}
+        </>
       )}
       <EndChat />
     </div>

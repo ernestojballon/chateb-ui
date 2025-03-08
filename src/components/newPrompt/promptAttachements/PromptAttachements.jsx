@@ -27,7 +27,7 @@ const PromptAttachements = () => {
             urlEndpoint={import.meta.env.VITE_IMAGE_KIT_ENDPOINT}
             path={attachment.filePath}
             width="50"
-            transformation={[{ width: 100, height: 100 }]}
+            transformation={[{ width: 50, height: 50 }]}
           />
         </div>
       ))}

@@ -1,11 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react"; // Or however you're importing Clerk
 
 export function useDeleteChatById() {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { getToken } = useAuth();
   const deleteChatMutation = useMutation({
     mutationFn: async (chatId) => {

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./chatList.css";
 import { useGetUserChats } from "../../apiCalls/useGetUserChats";
 import { useDeleteChatById } from "../../apiCalls/useDeleteChatById";
@@ -8,17 +8,20 @@ import useStore from "../../store";
 
 import { useCreateNewChat } from "../../helpers/useCreateNewChat";
 import Spinner from "../spinner/Spinner";
+import { useQueryClient } from "@tanstack/react-query";
+import { ColoredScrollbars } from "../coloredScrollBar/coloredScrollBar";
 
 const ChatList = () => {
   const navigate = useNavigate();
   const { isPending, error, data } = useGetUserChats();
-  const { setIsSidebarOpen, setChatId, chatId, chatHistory } = useStore();
+  const queryClient = useQueryClient();
+  const { setIsSidebarOpen, setChatId, chatId } = useStore();
 
   const { createNewChat, isCreating } = useCreateNewChat();
 
   const deleteMutation = useDeleteChatById();
 
-  const handleDelete = async(e, ToDeleteChatId) => {
+  const handleDelete = async (e, ToDeleteChatId) => {
     e.preventDefault(); // Prevent navigation
     e.stopPropagation(); // Prevent event bubbling
 
@@ -60,23 +63,27 @@ const ChatList = () => {
       </button>
       <hr />
       <span className="title">RECENT CHATS</span>
-      <div className="list">
+      <ColoredScrollbars className="list">
         {isPending ? (
           <Spinner size={"small"} />
         ) : error ? (
           "Something went wrong!"
         ) : (
           data?.map((chat) => (
-            <button
-              className={`chat-item ${chatId === chat._id ? "active" : ""}`}
+            <div
               key={chat._id}
+              className={`${chatId === chat._id ? "chat-item active" : "chat-item"}`}
             >
-              <div
-                className="chat-link"
-                onClick={() => handleChatSelect(chat._id)}
+              <Link
+                to={`/dashboard/chats/${chat._id}`}
+                className={`${chatId === chat._id ? "active" : ""}`}
+                onClick={() => {
+                  setIsSidebarOpen(false);
+                  setChatId(chat._id);
+                }}
               >
                 {chat.title}
-              </div>
+              </Link>
               <span
                 className="delete-btn"
                 onClick={(e) => handleDelete(e, chat._id)}
@@ -84,10 +91,10 @@ const ChatList = () => {
               >
                 <FaTrash />
               </span>
-            </button>
+            </div>
           ))
         )}
-      </div>
+      </ColoredScrollbars>
       <hr />
     </div>
   );
