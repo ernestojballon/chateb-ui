@@ -18,12 +18,17 @@ const ChatList = () => {
 
   const deleteMutation = useDeleteChatById();
 
-  const handleDelete = (e, chatId) => {
+  const handleDelete = async(e, ToDeleteChatId) => {
     e.preventDefault(); // Prevent navigation
     e.stopPropagation(); // Prevent event bubbling
 
     if (window.confirm("Are you sure you want to delete this chat?")) {
-      deleteMutation.mutate(chatId);
+      await deleteMutation.mutateAsync(ToDeleteChatId);
+      if (ToDeleteChatId === chatId) {
+        setChatId(null);
+        navigate("/dashboard");
+        queryClient.invalidateQueries("userChats");
+      }
     }
   };
   // New function to handle chat selection
@@ -72,13 +77,13 @@ const ChatList = () => {
               >
                 {chat.title}
               </div>
-              <button
+              <span
                 className="delete-btn"
                 onClick={(e) => handleDelete(e, chat._id)}
                 aria-label="Delete chat"
               >
                 <FaTrash />
-              </button>
+              </span>
             </button>
           ))
         )}

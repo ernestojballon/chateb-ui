@@ -22,10 +22,6 @@ export function useDeleteChatById() {
         return res.json();
       });
     },
-    onSuccess: () => {
-      navigate("/dashboard");
-      queryClient.invalidateQueries("userChats");
-    },
   });
 
   return deleteChatMutation;
